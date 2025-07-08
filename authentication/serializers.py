@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class LoginSerializer(serializers.Serializer):
@@ -9,11 +11,13 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
     
     def validate(self, attrs):
-        login = attrs.get('login')
+        email = attrs.get('login')  # В ТЗ поле называется login, но это email
         password = attrs.get('password')
         
-        if login and password:
-            user = authenticate(username=login, password=password)
+        if email and password:
+            # Аутентификация по email
+            user = authenticate(request=self.context.get('request'), 
+                              username=email, password=password)
             
             if not user:
                 raise serializers.ValidationError('Неверные учетные данные')

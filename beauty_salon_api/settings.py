@@ -142,6 +142,7 @@ SIMPLE_JWT = {
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
+    
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
@@ -175,3 +176,12 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=0, minute=0),  # Каждый день в полночь
     },
 }
+
+
+AUTH_USER_MODEL = 'authentication.CustomUser'
+
+# Authentication backends
+AUTHENTICATION_BACKENDS = [
+    'authentication.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
