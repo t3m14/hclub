@@ -157,3 +157,21 @@ SPECTACULAR_SETTINGS = {
 # Image processing settings
 MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB
 CROP_SIZE = 600
+
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Moscow'
+
+# Периодические задачи
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'update-daily-quote': {
+        'task': 'quotes.tasks.update_daily_quote',
+        'schedule': crontab(hour=0, minute=0),  # Каждый день в полночь
+    },
+}
