@@ -3,6 +3,9 @@ from django.core.validators import FileExtensionValidator
 from PIL import Image
 import os
 from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ImageUpload(models.Model):
@@ -44,12 +47,24 @@ class ImageUpload(models.Model):
         
         # Обрабатываем изображение только для новых объектов
         if is_new and self.original_image:
-            self.process_image()
+            try:
+                self.process_image()
+            except Exception as e:
+                logger.error(f"Error processing image {self.id}: {str(e)}")
+                # Не прерываем сохранение, просто логируем ошибку
     
     def process_image(self):
         """Обработка изображения: конвертация в webp, сжатие, обрезка"""
         try:
+            if not self.original_image:
+                return
+                
             image_path = self.original_image.path
+            
+            # Проверяем, что файл существует
+            if not os.path.exists(image_path):
+                logger.error(f"Image file not found: {image_path}")
+                return
             
             with Image.open(image_path) as img:
                 # Конвертация в RGB если нужно
@@ -102,7 +117,8 @@ class ImageUpload(models.Model):
             )
             
         except Exception as e:
-            print(f"Ошибка обработки изображения: {e}")
+            logger.error(f"Error processing image {self.id}: {str(e)}")
+            raise  # Пробрасываем ошибку для логирования в save()
     
     def get_processed_path(self):
         """Генерация пути для обработанного изображения"""

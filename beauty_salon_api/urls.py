@@ -11,7 +11,8 @@ urlpatterns = [
     
     # API endpoints
     path('api/auth/', include('authentication.urls')),
-    path('api/', include('services.urls')),
+    path('api/service_types/', include('services.urls')),  # Изменено для соответствия ТЗ
+    path('api/services/', include('services.urls')),
     path('api/masters/', include('masters.urls')),
     path('api/portfolio/', include('portfolio.urls')),
     path('api/products/', include('products.urls')),
