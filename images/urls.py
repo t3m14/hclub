@@ -6,5 +6,5 @@ router = DefaultRouter()
 router.register(r'', views.ImageUploadViewSet, basename='image')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', include(router.urls), {'http_method_names': ['get', 'head', 'options', 'post', 'put', 'patch', 'delete']}),
 ]
