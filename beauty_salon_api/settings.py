@@ -185,3 +185,13 @@ AUTHENTICATION_BACKENDS = [
     'authentication.backends.EmailBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+
+FILE_UPLOAD_MAX_MEMORY_SIZE = 128 * 1024 * 1024  # 128MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 128 * 1024 * 1024  # 128MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
+
+# Для работы с изображениями
+ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp']
+MAX_IMAGE_SIZE = 128 * 1024 * 1024  # 128MB
+CROP_SIZE = 600
