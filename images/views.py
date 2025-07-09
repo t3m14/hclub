@@ -14,6 +14,7 @@ class ImageUploadViewSet(viewsets.ModelViewSet):
     filter_backends = [OrderingFilter]
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete']
     
     def get_serializer_class(self):
         if self.action == 'list':
