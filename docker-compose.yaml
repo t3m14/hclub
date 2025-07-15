@@ -12,6 +12,7 @@ services:
       - POSTGRES_DB=beauty_salon
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    restart: always
     ports:
       - "5432:5432"
 
@@ -62,6 +63,7 @@ services:
       - DB_NAME=beauty_salon
       - DB_USER=postgres
       - DB_PASSWORD=postgres
+    restart: on_failure
     depends_on:
       - db
       - redis

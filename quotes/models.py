@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 import random
-
+import logging
 
 class Quote(models.Model):
     author = models.CharField(max_length=100, blank=True, verbose_name='Автор')
@@ -54,9 +54,10 @@ class DailyQuote(models.Model):
     
     @classmethod
     def get_today_quote(cls):
+        
         """Получение цитаты на сегодня"""
         today = timezone.now().date()
-        
+        logging.info(f"Получение цитаты дня для {today}")
         # Проверяем, есть ли цитата на сегодня
         daily_quote = cls.objects.filter(date=today).first()
         
