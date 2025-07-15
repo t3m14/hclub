@@ -63,7 +63,7 @@ services:
       - DB_NAME=beauty_salon
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-    restart: on_failure
+    restart: on-failure
     depends_on:
       - db
       - redis
