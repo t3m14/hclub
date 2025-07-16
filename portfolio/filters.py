@@ -10,6 +10,7 @@ class PortfolioFilter(django_filters.FilterSet):
     
     class Meta:
         model = Portfolio
+        # fields = ['master_name', 'service_type_id', 'target']
         fields = ['service_type_id', 'service_id']
     
     def filter_master_name(self, queryset, name, value):

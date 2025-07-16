@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     # Local apps
     'authentication',
     'services',
+    'service_types',
     'masters',
     'portfolio',
     'products',

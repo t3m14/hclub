@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Master
 from products.serializers import ProductSerializer
-from services.serializers import ServiceTypeSerializer
+from service_types.serializers import ServiceTypeSerializer
 
 
 class MasterSerializer(serializers.ModelSerializer):

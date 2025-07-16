@@ -5,7 +5,7 @@ class Portfolio(models.Model):
     image = models.URLField(verbose_name='Изображение')
     master = models.JSONField(verbose_name='Мастер')  # Хранится как объект, не привязан к ID
     service_type = models.ForeignKey(
-        'services.ServiceType',
+        'service_types.ServiceType',
         on_delete=models.CASCADE,
         related_name='portfolio_items',
         verbose_name='Тип услуги'
