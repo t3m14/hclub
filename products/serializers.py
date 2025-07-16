@@ -16,4 +16,8 @@ class ProductListSerializer(serializers.ModelSerializer):
     """Упрощенный сериализатор для списка продуктов"""
     class Meta:
         model = Product
-        fields = ['id', 'brand', 'name', 'purpose']
+        fields = [
+            'id', 'brand', 'name', 'image', 'purpose',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
