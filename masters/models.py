@@ -15,7 +15,7 @@ class Master(models.Model):
         verbose_name='Любимый продукт'
     )
     service_types = models.ManyToManyField(
-        'services.ServiceType',
+        'service_types.ServiceType',  # Исправлено: было 'services.ServiceType'
         related_name='masters',
         verbose_name='Типы услуг'
     )
