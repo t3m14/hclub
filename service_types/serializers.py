@@ -9,7 +9,7 @@ class ServiceTypeSerializer(serializers.ModelSerializer):
         model = ServiceType
         fields = [
             'id', 'name', 'description', 'client_types', 'main_image',
-            'benefits', 'benefits_images', 'target', 'products', 'slug',
+            'benefits', 'benefits_images', 'target', 'products',
             'services_count', 'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
@@ -22,15 +22,6 @@ class ServiceTypeSerializer(serializers.ModelSerializer):
         """Валидация типов клиентов"""
         if not isinstance(value, list):
             raise serializers.ValidationError("client_types должен быть массивом")
-        
-        allowed_types = ['для мужчин', 'для женщин', 'для детей']
-        for client_type in value:
-            if client_type not in allowed_types:
-                raise serializers.ValidationError(
-                    f"Недопустимый тип клиента: {client_type}. "
-                    f"Разрешены: {', '.join(allowed_types)}"
-                )
-        
         return value
     
     def validate_benefits(self, value):
@@ -62,16 +53,7 @@ class ServiceTypeSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Все ID продуктов должны быть числами")
         
         return value
-    
-    def validate_target(self, value):
-        """Валидация цели"""
-        allowed_targets = ['волосы', 'маникюр', 'макияж']
-        if value not in allowed_targets:
-            raise serializers.ValidationError(
-                f"Недопустимая цель: {value}. "
-                f"Разрешены: {', '.join(allowed_targets)}"
-            )
-        return value
+
 
 
 class ServiceTypeListSerializer(serializers.ModelSerializer):
@@ -81,7 +63,7 @@ class ServiceTypeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceType
         fields = [
-            'id', 'name', 'target', 'main_image', 'services_count', 'slug'
+            'id', 'name', 'target', 'main_image', 'services_count',
         ]
     
     def get_services_count(self, obj):

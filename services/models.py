@@ -67,7 +67,3 @@ class Service(models.Model):
             counter += 1
             
         return slug
-
-
-# Удаляем дублирующую модель ServiceType
-# Она должна быть только в service_types/models.py
