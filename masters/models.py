@@ -3,9 +3,9 @@ from django.core.validators import MinValueValidator
 
 
 class Master(models.Model):
-    name = models.CharField(max_length=100, verbose_name='Имя')
+    name = models.CharField(max_length=200, verbose_name='Имя')
     image = models.URLField(blank=True, null=True, verbose_name='Изображение')
-    job_title = models.CharField(max_length=100, verbose_name='Должность')
+    job_title = models.CharField(max_length=200, verbose_name='Должность')
     favorite_product = models.ForeignKey(
         'products.Product',
         on_delete=models.SET_NULL,

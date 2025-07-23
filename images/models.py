@@ -2,26 +2,55 @@ from django.db import models
 from django.core.validators import FileExtensionValidator
 from PIL import Image
 import os
+import uuid
 from django.conf import settings
+from django.utils.text import slugify
 import logging
 
 logger = logging.getLogger(__name__)
 
 
+def upload_to_original(instance, filename):
+    """Генерация безопасного пути для оригинального файла"""
+    ext = filename.split('.')[-1].lower() if '.' in filename else 'jpg'
+    # Берем только первые 50 символов названия файла и делаем slug
+    name_part = slugify(filename.split('.')[0][:50]) or 'image'
+    # Добавляем уникальный идентификатор
+    unique_id = uuid.uuid4().hex[:8]
+    new_filename = f"{unique_id}_{name_part}.{ext}"
+    return f'images/original/{new_filename}'
+
+
+def upload_to_processed(instance, filename):
+    """Генерация безопасного пути для обработанного файла"""
+    ext = 'webp'  # Всегда конвертируем в webp
+    unique_id = uuid.uuid4().hex[:8]
+    new_filename = f"{unique_id}_processed.{ext}"
+    return f'images/processed/{new_filename}'
+
+
+def upload_to_cropped(instance, filename):
+    """Генерация безопасного пути для обрезанного файла"""
+    ext = 'webp'  # Всегда конвертируем в webp
+    unique_id = uuid.uuid4().hex[:8]
+    new_filename = f"{unique_id}_cropped.{ext}"
+    return f'images/cropped/{new_filename}'
+
+
 class ImageUpload(models.Model):
     original_image = models.ImageField(
-        upload_to='images/original/',
-        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'webp'])],
+        upload_to=upload_to_original,
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'tiff'])],  # Добавлены форматы
         verbose_name='Оригинальное изображение'
     )
     processed_image = models.ImageField(
-        upload_to='images/processed/',
+        upload_to=upload_to_processed,
         blank=True,
         null=True,
         verbose_name='Обработанное изображение'
     )
     cropped_image = models.ImageField(
-        upload_to='images/cropped/',
+        upload_to=upload_to_cropped,
         blank=True,
         null=True,
         verbose_name='Обрезанное изображение'
@@ -41,17 +70,14 @@ class ImageUpload(models.Model):
         return f"Изображение {self.id}"
     
     def save(self, *args, **kwargs):
-        # Сначала сохраняем объект
         is_new = self.pk is None
         super().save(*args, **kwargs)
         
-        # Обрабатываем изображение только для новых объектов
         if is_new and self.original_image:
             try:
                 self.process_image()
             except Exception as e:
                 logger.error(f"Error processing image {self.id}: {str(e)}")
-                # Не прерываем сохранение, просто логируем ошибку
     
     def process_image(self):
         """Обработка изображения: конвертация в webp, сжатие, обрезка"""
@@ -61,39 +87,30 @@ class ImageUpload(models.Model):
                 
             image_path = self.original_image.path
             
-            # Проверяем, что файл существует
             if not os.path.exists(image_path):
                 logger.error(f"Image file not found: {image_path}")
                 return
             
             with Image.open(image_path) as img:
-                # Конвертация в RGB если нужно
                 if img.mode in ('RGBA', 'LA', 'P'):
                     img = img.convert('RGB')
                 
-                # Сжатие изображения
                 if self.is_compressed:
-                    # Изменение размера если изображение слишком большое
                     max_size = (1920, 1080)
                     img.thumbnail(max_size, Image.Resampling.LANCZOS)
                     
-                    # Сохранение обработанного изображения в webp
                     processed_path = self.get_processed_path()
                     os.makedirs(os.path.dirname(processed_path), exist_ok=True)
                     img.save(processed_path, 'WEBP', quality=85, optimize=True)
                     
-                    # Обновление поля processed_image
                     processed_relative_path = os.path.relpath(processed_path, settings.MEDIA_ROOT)
                     self.processed_image.name = processed_relative_path
                 
-                # Обрезка изображения
                 if self.is_cropped:
-                    # Обрезка до 600px (квадрат)
                     size = (600, 600)
                     img_cropped = img.copy()
                     img_cropped.thumbnail(size, Image.Resampling.LANCZOS)
                     
-                    # Создание квадратного изображения
                     img_square = Image.new('RGB', size, (255, 255, 255))
                     img_square.paste(
                         img_cropped,
@@ -101,16 +118,13 @@ class ImageUpload(models.Model):
                          (size[1] - img_cropped.size[1]) // 2)
                     )
                     
-                    # Сохранение обрезанного изображения
                     cropped_path = self.get_cropped_path()
                     os.makedirs(os.path.dirname(cropped_path), exist_ok=True)
                     img_square.save(cropped_path, 'WEBP', quality=85, optimize=True)
                     
-                    # Обновление поля cropped_image
                     cropped_relative_path = os.path.relpath(cropped_path, settings.MEDIA_ROOT)
                     self.cropped_image.name = cropped_relative_path
             
-            # Сохранение обновленных полей
             ImageUpload.objects.filter(id=self.id).update(
                 processed_image=self.processed_image.name if self.processed_image else None,
                 cropped_image=self.cropped_image.name if self.cropped_image else None
@@ -118,17 +132,17 @@ class ImageUpload(models.Model):
             
         except Exception as e:
             logger.error(f"Error processing image {self.id}: {str(e)}")
-            raise  # Пробрасываем ошибку для логирования в save()
+            raise
     
     def get_processed_path(self):
         """Генерация пути для обработанного изображения"""
-        base_name = os.path.splitext(os.path.basename(self.original_image.name))[0]
-        return os.path.join(settings.MEDIA_ROOT, 'images', 'processed', f'{base_name}_processed.webp')
+        unique_id = uuid.uuid4().hex[:8]
+        return os.path.join(settings.MEDIA_ROOT, 'images', 'processed', f'{unique_id}_processed.webp')
     
     def get_cropped_path(self):
         """Генерация пути для обрезанного изображения"""
-        base_name = os.path.splitext(os.path.basename(self.original_image.name))[0]
-        return os.path.join(settings.MEDIA_ROOT, 'images', 'cropped', f'{base_name}_cropped.webp')
+        unique_id = uuid.uuid4().hex[:8]
+        return os.path.join(settings.MEDIA_ROOT, 'images', 'cropped', f'{unique_id}_cropped.webp')
     
     def get_image_url(self):
         """Получение URL изображения (приоритет: обработанное -> оригинальное)"""

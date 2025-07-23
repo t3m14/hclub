@@ -6,10 +6,10 @@ class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
         fields = [
-            'id', 'email', 'phones', 'instagram', 'telegram',
-            'whatsapp', 'schedule', 'created_at', 'updated_at'
+            'email', 'phones', 'instagram', 'telegram',
+            'whatsapp', 'schedule'
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        # Убираем id, created_at, updated_at из ответа
     
     def validate_schedule(self, value):
         """Валидация расписания"""
