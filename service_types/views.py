@@ -33,8 +33,30 @@ class ServiceTypeViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             service_type = serializer.save()
-            logger.info(f"Service type created successfully: {service_type.id}")
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            logger.info(f"Service type created successfully: {service_type.id}, slug: {service_type.slug}")
+            
+            # Используем полный сериализатор для ответа, чтобы включить slug
+            response_serializer = ServiceTypeSerializer(service_type, context={'request': request})
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         else:
             logger.error(f"Service type creation failed: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def update(self, request, *args, **kwargs):
+        """Обновление типа услуги"""
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        
+        logger.info(f"Updating service type {instance.id} with data: {request.data}")
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if serializer.is_valid():
+            service_type = serializer.save()
+            logger.info(f"Service type updated successfully: {service_type.id}, slug: {service_type.slug}")
+            
+            # Используем полный сериализатор для ответа
+            response_serializer = ServiceTypeSerializer(service_type, context={'request': request})
+            return Response(response_serializer.data)
+        else:
+            logger.error(f"Service type update failed: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

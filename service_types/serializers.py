@@ -9,10 +9,10 @@ class ServiceTypeSerializer(serializers.ModelSerializer):
         model = ServiceType
         fields = [
             'id', 'name', 'description', 'client_types', 'main_image',
-            'benefits', 'benefits_images', 'target', 'products',
+            'benefits', 'benefits_images', 'target', 'products', 'slug',
             'services_count', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'slug']
     
     def get_services_count(self, obj):
         """Количество услуг данного типа"""
@@ -55,7 +55,6 @@ class ServiceTypeSerializer(serializers.ModelSerializer):
         return value
 
 
-
 class ServiceTypeListSerializer(serializers.ModelSerializer):
     """Упрощенный сериализатор для списка типов услуг"""
     services_count = serializers.SerializerMethodField()
@@ -63,7 +62,7 @@ class ServiceTypeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceType
         fields = [
-            'id', 'name', 'target', 'main_image', 'services_count',
+            'id', 'name', 'target', 'main_image', 'slug', 'services_count',
         ]
     
     def get_services_count(self, obj):

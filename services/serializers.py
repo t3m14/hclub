@@ -14,7 +14,13 @@ class ServiceSerializer(serializers.ModelSerializer):
             'description', 'price_from', 'price_to', 'main_images', 
             'duration', 'steps', 'slug', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'slug']
+        extra_kwargs = {
+            'description': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'price_from': {'required': False, 'allow_null': True},
+            'price_to': {'required': False, 'allow_null': True},
+            'duration': {'required': False, 'allow_null': True},
+        }
     
     def validate_service_type(self, value):
         """Проверка существования типа услуги"""
@@ -51,7 +57,8 @@ class ServiceSerializer(serializers.ModelSerializer):
         price_from = data.get('price_from')
         price_to = data.get('price_to')
         
-        if price_from and price_to and price_from > price_to:
+        # Проверяем цены только если они обе указаны
+        if price_from is not None and price_to is not None and price_from > price_to:
             raise serializers.ValidationError("price_from не может быть больше price_to")
         
         return data

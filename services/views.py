@@ -33,10 +33,32 @@ class ServiceViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             service = serializer.save()
-            logger.info(f"Service created successfully: {service.id}")
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            logger.info(f"Service created successfully: {service.id}, slug: {service.slug}")
+            
+            # Используем полный сериализатор для ответа, чтобы включить slug
+            response_serializer = ServiceSerializer(service, context={'request': request})
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         else:
             logger.error(f"Service creation failed: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def update(self, request, *args, **kwargs):
+        """Обновление услуги"""
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        
+        logger.info(f"Updating service {instance.id} with data: {request.data}")
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if serializer.is_valid():
+            service = serializer.save()
+            logger.info(f"Service updated successfully: {service.id}, slug: {service.slug}")
+            
+            # Используем полный сериализатор для ответа
+            response_serializer = ServiceSerializer(service, context={'request': request})
+            return Response(response_serializer.data)
+        else:
+            logger.error(f"Service update failed: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def list(self, request, *args, **kwargs):

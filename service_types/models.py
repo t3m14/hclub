@@ -50,7 +50,8 @@ class ServiceType(models.Model):
         return self.name
     
     def save(self, *args, **kwargs):
-        if not self.slug:
+        # Генерируем slug при создании или если название изменилось
+        if not self.pk or self._state.adding or 'name' in getattr(self, '_changed_fields', []):
             self.slug = self.generate_unique_slug()
         super().save(*args, **kwargs)
     
@@ -60,7 +61,7 @@ class ServiceType(models.Model):
         slug = base_slug
         counter = 1
         
-        while ServiceType.objects.filter(slug=slug).exists():
+        while ServiceType.objects.filter(slug=slug).exclude(pk=self.pk).exists():
             slug = f"{base_slug}-{counter}"
             counter += 1
             
