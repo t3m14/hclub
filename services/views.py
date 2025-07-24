@@ -17,13 +17,9 @@ class ServiceViewSet(viewsets.ModelViewSet):
     pagination_class = ServicePagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ServiceFilter
-    search_fields = ['name', 'description', 'service_type__name']
-    ordering_fields = ['name', 'price_from', 'price_to', 'duration', 'created_at']
+    search_fields = ['name', 'description', 'service_type__name', 'target']
+    ordering_fields = ['name', 'price_from', 'price_to', 'duration', 'target', 'created_at']
     ordering = ['-created_at']
-    
-    # Указываем, что lookup должен происходить по slug
-    lookup_field = 'slug'
-    lookup_url_kwarg = 'slug'
     
     def get_serializer_class(self):
         if self.action == 'list':
@@ -37,36 +33,16 @@ class ServiceViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             service = serializer.save()
-            logger.info(f"Service created successfully: {service.id}, slug: {service.slug}")
-            
-            # Используем полный сериализатор для ответа, чтобы включить slug
-            response_serializer = ServiceSerializer(service, context={'request': request})
-            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+            logger.info(f"Service created successfully: {service.id}")
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             logger.error(f"Service creation failed: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def update(self, request, *args, **kwargs):
-        """Обновление услуги"""
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        
-        logger.info(f"Updating service {instance.id} with data: {request.data}")
-        
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        if serializer.is_valid():
-            service = serializer.save()
-            logger.info(f"Service updated successfully: {service.id}, slug: {service.slug}")
-            
-            # Используем полный сериализатор для ответа
-            response_serializer = ServiceSerializer(service, context={'request': request})
-            return Response(response_serializer.data)
-        else:
-            logger.error(f"Service update failed: {serializer.errors}")
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
     def list(self, request, *args, **kwargs):
         """Список услуг с кастомным форматом пагинации"""
+        logger.info(f"Services list request with filters: {request.query_params}")
+        
         queryset = self.filter_queryset(self.get_queryset())
         
         # Получаем общее количество записей

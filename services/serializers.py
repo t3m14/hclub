@@ -6,16 +6,16 @@ from service_types.models import ServiceType
 class ServiceSerializer(serializers.ModelSerializer):
     service_type_name = serializers.CharField(source='service_type.name', read_only=True)
     service_type_target = serializers.CharField(source='service_type.target', read_only=True)
-    service_type_slug = serializers.CharField(source='service_type.slug', read_only=True)
     
     class Meta:
         model = Service
         fields = [
             'id', 'name', 'service_type', 'service_type_name', 'service_type_target',
-            'service_type_slug', 'description', 'price_from', 'price_to', 'main_images', 
-            'duration', 'steps', 'slug', 'created_at', 'updated_at'
+            'description', 'price_from', 'price_to', 'main_images', 
+            'duration', 'steps', 'target', 'client_types', 'slug', 
+            'created_at', 'updated_at'
         ]
-        read_only_fields = ['created_at', 'updated_at', 'slug']
+        read_only_fields = ['created_at', 'updated_at']
     
     def validate_service_type(self, value):
         """Проверка существования типа услуги"""
@@ -47,6 +47,18 @@ class ServiceSerializer(serializers.ModelSerializer):
         
         return value
     
+    def validate_client_types(self, value):
+        """Валидация типов клиентов"""
+        if not isinstance(value, list):
+            raise serializers.ValidationError("client_types должен быть массивом")
+        
+        # Проверяем, что все элементы - числа (ID)
+        for client_type_id in value:
+            if not isinstance(client_type_id, int):
+                raise serializers.ValidationError("Все ID типов клиентов должны быть числами")
+        
+        return value
+    
     def validate(self, data):
         """Общая валидация"""
         price_from = data.get('price_from')
@@ -59,9 +71,8 @@ class ServiceSerializer(serializers.ModelSerializer):
 
 
 class ServiceListSerializer(serializers.ModelSerializer):
-    """ сериализатор для списка услуг"""
+    """Упрощенный сериализатор для списка услуг"""
     service_type_name = serializers.CharField(source='service_type.name', read_only=True)
-    service_type_slug = serializers.CharField(source='service_type.slug', read_only=True)
     
     class Meta:
         model = Service
