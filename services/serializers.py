@@ -1,3 +1,4 @@
+# services/serializers.py
 from rest_framework import serializers
 from .models import Service
 from service_types.models import ServiceType
@@ -13,9 +14,9 @@ class ServiceSerializer(serializers.ModelSerializer):
             'id', 'name', 'service_type', 'service_type_name', 'service_type_target',
             'description', 'price_from', 'price_to', 'main_images', 
             'duration', 'steps', 'target', 'client_types',
-            'created_at', 'updated_at'
+            'slug', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'slug']
     
     def validate_service_type(self, value):
         """Проверка существования типа услуги"""
@@ -48,14 +49,14 @@ class ServiceSerializer(serializers.ModelSerializer):
         return value
     
     def validate_client_types(self, value):
-        """Валидация типов клиентов"""
+        """Валидация типов клиентов - теперь массив строк"""
         if not isinstance(value, list):
             raise serializers.ValidationError("client_types должен быть массивом")
         
-        # Проверяем, что все элементы - числа (ID)
-        for client_type_id in value:
-            if not isinstance(client_type_id, int):
-                raise serializers.ValidationError("Все ID типов клиентов должны быть числами")
+        # Проверяем, что все элементы - строки
+        for client_type in value:
+            if not isinstance(client_type, str):
+                raise serializers.ValidationError("Все элементы client_types должны быть строками")
         
         return value
     
@@ -66,6 +67,16 @@ class ServiceSerializer(serializers.ModelSerializer):
         
         if price_from and price_to and price_from > price_to:
             raise serializers.ValidationError("price_from не может быть больше price_to")
+        
+        # Валидация положительных значений
+        if price_from is not None and price_from < 0:
+            raise serializers.ValidationError("price_from должно быть положительным числом")
+        
+        if price_to is not None and price_to < 0:
+            raise serializers.ValidationError("price_to должно быть положительным числом")
+        
+        if data.get('duration') is not None and data.get('duration') < 0:
+            raise serializers.ValidationError("duration должно быть положительным числом")
         
         return data
 

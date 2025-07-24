@@ -1,3 +1,4 @@
+# services/models.py
 from django.db import models
 from slugify import slugify
 
@@ -10,26 +11,29 @@ class Service(models.Model):
         related_name='services',
         verbose_name='Тип услуги'
     )
-    description = models.TextField(verbose_name='Описание', default='')  # Временный default
-    price_from = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2,
-        verbose_name='Цена от'
+    description = models.TextField(verbose_name='Описание', blank=True, null=True)
+    price_from = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        verbose_name='Цена от (руб.)',
+        help_text='Цена в рублях'
     )
-    price_to = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2,
-        verbose_name='Цена до'
+    price_to = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        verbose_name='Цена до (руб.)',
+        help_text='Цена в рублях'
     )
     main_images = models.JSONField(
         default=list,
         blank=True,
         verbose_name='Основные изображения'
     )
-    duration = models.CharField(
-        max_length=50,
-        verbose_name='Продолжительность',
-        default='1 час'  # Временный default
+    duration = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        verbose_name='Продолжительность (минуты)',
+        help_text='Продолжительность в минутах'
     )
     steps = models.JSONField(
         default=list,
@@ -39,13 +43,14 @@ class Service(models.Model):
     target = models.CharField(
         max_length=100,
         blank=True,
-        default='',  # Временный default
+        default='',
         verbose_name='Цель'
     )
     client_types = models.JSONField(
         default=list,
         blank=True,
-        verbose_name='Типы клиентов (массив ID)'
+        verbose_name='Типы клиентов (массив строк)',
+        help_text='Например: ["для мужчин", "для женщин", "для детей"]'
     )
     slug = models.SlugField(
         unique=True,
