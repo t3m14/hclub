@@ -2,50 +2,37 @@ from django.db import models
 from slugify import slugify
 
 
-class Service(models.Model):
+class ServiceType(models.Model):
     name = models.CharField(max_length=255, verbose_name='Название')
-    service_type = models.ForeignKey(
-        'service_types.ServiceType',
-        on_delete=models.CASCADE,
-        related_name='services',
-        verbose_name='Тип услуги'
-    )
-    description = models.TextField(verbose_name='Описание', default='')  # Временный default
-    price_from = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2,
-        verbose_name='Цена от'
-    )
-    price_to = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2,
-        verbose_name='Цена до'
-    )
-    main_images = models.JSONField(
-        default=list,
-        blank=True,
-        verbose_name='Основные изображения'
-    )
-    duration = models.CharField(
-        max_length=50,
-        verbose_name='Продолжительность',
-        default='1 час'  # Временный default
-    )
-    steps = models.JSONField(
-        default=list,
-        blank=True,
-        verbose_name='Этапы услуги'
-    )
-    target = models.CharField(
-        max_length=100,
-        blank=True,
-        default='',  # Временный default
-        verbose_name='Цель'
-    )
+    description = models.TextField(verbose_name='Описание')
     client_types = models.JSONField(
         default=list,
         blank=True,
-        verbose_name='Типы клиентов (массив ID)'
+        verbose_name='Типы клиентов'
+    )
+    main_image = models.URLField(
+        blank=True, 
+        null=True,
+        verbose_name='Основное изображение'
+    )
+    benefits = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name='Преимущества'
+    )
+    benefits_images = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name='Изображения преимуществ'
+    )
+    target = models.CharField(
+        max_length=200,
+        verbose_name='Цель'
+    )
+    products = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name='Продукты'
     )
     slug = models.SlugField(
         unique=True,
@@ -56,14 +43,15 @@ class Service(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        verbose_name = 'Услуга'
-        verbose_name_plural = 'Услуги'
+        verbose_name = 'Тип услуги'
+        verbose_name_plural = 'Типы услуг'
     
     def __str__(self):
         return self.name
     
     def save(self, *args, **kwargs):
-        if not self.slug:
+        # Генерируем slug при создании или если название изменилось
+        if not self.pk or self._state.adding or 'name' in getattr(self, '_changed_fields', []):
             self.slug = self.generate_unique_slug()
         super().save(*args, **kwargs)
     
@@ -73,7 +61,7 @@ class Service(models.Model):
         slug = base_slug
         counter = 1
         
-        while Service.objects.filter(slug=slug).exists():
+        while ServiceType.objects.filter(slug=slug).exclude(pk=self.pk).exists():
             slug = f"{base_slug}-{counter}"
             counter += 1
             

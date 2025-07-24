@@ -10,7 +10,7 @@ class Service(models.Model):
         related_name='services',
         verbose_name='Тип услуги'
     )
-    description = models.TextField(verbose_name='Описание')
+    description = models.TextField(verbose_name='Описание', default='')  # Временный default
     price_from = models.DecimalField(
         max_digits=10, 
         decimal_places=2,
@@ -28,7 +28,8 @@ class Service(models.Model):
     )
     duration = models.CharField(
         max_length=50,
-        verbose_name='Продолжительность'
+        verbose_name='Продолжительность',
+        default='1 час'  # Временный default
     )
     steps = models.JSONField(
         default=list,
@@ -38,6 +39,7 @@ class Service(models.Model):
     target = models.CharField(
         max_length=100,
         blank=True,
+        default='',  # Временный default
         verbose_name='Цель'
     )
     client_types = models.JSONField(
