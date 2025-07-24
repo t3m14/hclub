@@ -34,12 +34,9 @@ class Service(models.Model):
         blank=True,
         verbose_name='Основные изображения'
     )
-    duration = models.DecimalField(
-        max_digits=4, 
-        decimal_places=2,
-        blank=True,  # Добавлено
-        null=True,   # Добавлено
-        verbose_name='Продолжительность (часы)'
+    duration = models.CharField(
+        max_length=100,
+        verbose_name='Продолжительность'
     )
     steps = models.JSONField(
         default=list,

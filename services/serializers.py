@@ -59,13 +59,10 @@ class ServiceSerializer(serializers.ModelSerializer):
 
 
 class ServiceListSerializer(serializers.ModelSerializer):
-    """Упрощенный сериализатор для списка услуг"""
+    """ сериализатор для списка услуг"""
     service_type_name = serializers.CharField(source='service_type.name', read_only=True)
     service_type_slug = serializers.CharField(source='service_type.slug', read_only=True)
     
     class Meta:
         model = Service
-        fields = [
-            'id', 'name', 'service_type', 'service_type_name', 'service_type_slug',
-            'price_from', 'price_to', 'duration', 'slug'
-        ]
+        fields = '__all__'
