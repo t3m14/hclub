@@ -1,3 +1,4 @@
+# services/filters.py
 import django_filters
 from .models import Service
 
@@ -20,24 +21,23 @@ class ServiceFilter(django_filters.FilterSet):
     
     def filter_client_types(self, queryset, name, value):
         """
-        Фильтрация по типам клиентов
+        Фильтрация по типам клиентов (теперь строки)
         Можно передать:
-        - один ID: ?client_types=1
-        - несколько ID через запятую: ?client_types=1,2,3
+        - одну строку: ?client_types=для мужчин
+        - несколько строк через запятую: ?client_types=для мужчин,для женщин
         """
         try:
             if ',' in value:
-                # Несколько ID через запятую
-                client_type_ids = [int(id.strip()) for id in value.split(',')]
-                # Ищем услуги, которые содержат любой из указанных ID
+                # Несколько типов клиентов через запятую
+                client_types = [ct.strip() for ct in value.split(',')]
+                # Ищем услуги, которые содержат любой из указанных типов
                 from django.db.models import Q
                 query = Q()
-                for client_type_id in client_type_ids:
-                    query |= Q(client_types__contains=[client_type_id])
+                for client_type in client_types:
+                    query |= Q(client_types__icontains=client_type)
                 return queryset.filter(query)
             else:
-                # Один ID
-                client_type_id = int(value)
-                return queryset.filter(client_types__contains=[client_type_id])
+                # Один тип клиента
+                return queryset.filter(client_types__icontains=value.strip())
         except (ValueError, TypeError):
             return queryset.none()

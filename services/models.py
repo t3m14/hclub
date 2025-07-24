@@ -29,11 +29,12 @@ class Service(models.Model):
         blank=True,
         verbose_name='Основные изображения'
     )
-    duration = models.PositiveIntegerField(
+    duration = models.CharField(
+        max_length=100,
         blank=True,
         null=True,
-        verbose_name='Продолжительность (минуты)',
-        help_text='Продолжительность в минутах'
+        verbose_name='Продолжительность',
+        help_text='Например: "2 ч. 30 м." или "90 минут"'
     )
     steps = models.JSONField(
         default=list,

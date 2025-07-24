@@ -60,6 +60,16 @@ class ServiceSerializer(serializers.ModelSerializer):
         
         return value
     
+    def validate_duration(self, value):
+        """Валидация продолжительности как строки"""
+        if value is not None and not isinstance(value, str):
+            raise serializers.ValidationError("duration должно быть строкой")
+        
+        if value is not None and len(value.strip()) == 0:
+            raise serializers.ValidationError("duration не может быть пустой строкой")
+        
+        return value
+    
     def validate(self, data):
         """Общая валидация"""
         price_from = data.get('price_from')
@@ -68,15 +78,12 @@ class ServiceSerializer(serializers.ModelSerializer):
         if price_from and price_to and price_from > price_to:
             raise serializers.ValidationError("price_from не может быть больше price_to")
         
-        # Валидация положительных значений
+        # Валидация положительных значений для цен
         if price_from is not None and price_from < 0:
             raise serializers.ValidationError("price_from должно быть положительным числом")
         
         if price_to is not None and price_to < 0:
             raise serializers.ValidationError("price_to должно быть положительным числом")
-        
-        if data.get('duration') is not None and data.get('duration') < 0:
-            raise serializers.ValidationError("duration должно быть положительным числом")
         
         return data
 
