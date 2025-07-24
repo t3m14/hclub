@@ -12,7 +12,7 @@ class ServiceSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'service_type', 'service_type_name', 'service_type_target',
             'description', 'price_from', 'price_to', 'main_images', 
-            'duration', 'steps', 'target', 'client_types', 'slug', 
+            'duration', 'steps', 'target', 'client_types',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
