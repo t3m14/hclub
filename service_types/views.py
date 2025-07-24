@@ -6,6 +6,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import ServiceType
 from .serializers import ServiceTypeSerializer, ServiceTypeListSerializer
 from .filters import ServiceTypeFilter
+from utils.pagination import CustomPageNumberPagination  # Добавляем импорт пагинации
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,6 +16,7 @@ class ServiceTypeViewSet(viewsets.ModelViewSet):
     queryset = ServiceType.objects.prefetch_related('services').all()
     serializer_class = ServiceTypeSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = CustomPageNumberPagination  # Добавляем пагинацию
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ServiceTypeFilter
     search_fields = ['name', 'description', 'target']
