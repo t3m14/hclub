@@ -4,6 +4,9 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
+from django.http import Http404
+import os
 from .models import ImageUpload
 from .serializers import ImageUploadSerializer, ImageListSerializer
 import logging
@@ -76,6 +79,96 @@ class ImageUploadViewSet(viewsets.ModelViewSet):
             logger.error(f"Serializer validation errors: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+    @action(detail=False, methods=['delete'], url_path='slug')
+    def delete_by_slug(self, request):
+        """
+        Удаление изображения по slug (URL)
+        DELETE /api/images/slug/?slug=${image_url}
+        """
+        slug = request.query_params.get('slug')
+        
+        if not slug:
+            return Response(
+                {'error': 'Параметр slug обязателен'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        logger.info(f"=== DELETE /api/images/slug/?slug={slug} ===")
+        
+        try:
+            # Ищем изображение по различным полям URL
+            image_upload = None
+            
+            # Попробуем найти по original_image URL
+            images_by_original = ImageUpload.objects.filter(original_image__icontains=slug)
+            if images_by_original.exists():
+                image_upload = images_by_original.first()
+            
+            # Если не найдено, попробуем найти по processed_image URL
+            if not image_upload:
+                images_by_processed = ImageUpload.objects.filter(processed_image__icontains=slug)
+                if images_by_processed.exists():
+                    image_upload = images_by_processed.first()
+            
+            # Если не найдено, попробуем найти по cropped_image URL
+            if not image_upload:
+                images_by_cropped = ImageUpload.objects.filter(cropped_image__icontains=slug)
+                if images_by_cropped.exists():
+                    image_upload = images_by_cropped.first()
+            
+            # Если всё ещё не найдено, попробуем найти по части пути
+            if not image_upload:
+                # Извлекаем имя файла из slug
+                filename = os.path.basename(slug)
+                images_by_filename = ImageUpload.objects.filter(
+                    original_image__icontains=filename
+                )
+                if images_by_filename.exists():
+                    image_upload = images_by_filename.first()
+            
+            if not image_upload:
+                logger.warning(f"Image not found for slug: {slug}")
+                return Response(
+                    {'error': 'Изображение не найдено'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Удаляем физические файлы
+            try:
+                if image_upload.original_image and os.path.exists(image_upload.original_image.path):
+                    os.remove(image_upload.original_image.path)
+                    logger.info(f"Deleted original image file: {image_upload.original_image.path}")
+                
+                if image_upload.processed_image and os.path.exists(image_upload.processed_image.path):
+                    os.remove(image_upload.processed_image.path)
+                    logger.info(f"Deleted processed image file: {image_upload.processed_image.path}")
+                
+                if image_upload.cropped_image and os.path.exists(image_upload.cropped_image.path):
+                    os.remove(image_upload.cropped_image.path)
+                    logger.info(f"Deleted cropped image file: {image_upload.cropped_image.path}")
+            
+            except Exception as file_error:
+                logger.warning(f"Error deleting files for image {image_upload.id}: {str(file_error)}")
+                # Продолжаем удаление записи из БД даже если файлы не удалились
+            
+            # Удаляем запись из базы данных
+            image_id = image_upload.id
+            image_upload.delete()
+            
+            logger.info(f"Image {image_id} deleted successfully by slug: {slug}")
+            
+            return Response(
+                {'message': f'Изображение {image_id} успешно удалено'}, 
+                status=status.HTTP_204_NO_CONTENT
+            )
+            
+        except Exception as e:
+            logger.error(f"Error deleting image by slug {slug}: {str(e)}")
+            return Response(
+                {'error': f'Ошибка удаления изображения: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
     @action(detail=False, methods=['get'])
     def debug_routes(self, request):
         """
@@ -95,6 +188,7 @@ class ImageUploadViewSet(viewsets.ModelViewSet):
                 'update': 'PUT /api/images/{id}/',
                 'partial_update': 'PATCH /api/images/{id}/',
                 'destroy': 'DELETE /api/images/{id}/',
+                'delete_by_slug': 'DELETE /api/images/slug/?slug=${image_url}',
                 'debug_routes': 'GET /api/images/debug/',
             }
         })
