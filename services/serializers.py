@@ -6,21 +6,16 @@ from service_types.models import ServiceType
 class ServiceSerializer(serializers.ModelSerializer):
     service_type_name = serializers.CharField(source='service_type.name', read_only=True)
     service_type_target = serializers.CharField(source='service_type.target', read_only=True)
+    service_type_slug = serializers.CharField(source='service_type.slug', read_only=True)
     
     class Meta:
         model = Service
         fields = [
             'id', 'name', 'service_type', 'service_type_name', 'service_type_target',
-            'description', 'price_from', 'price_to', 'main_images', 
+            'service_type_slug', 'description', 'price_from', 'price_to', 'main_images', 
             'duration', 'steps', 'slug', 'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at', 'slug']
-        extra_kwargs = {
-            'description': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'price_from': {'required': False, 'allow_null': True},
-            'price_to': {'required': False, 'allow_null': True},
-            'duration': {'required': False, 'allow_null': True},
-        }
     
     def validate_service_type(self, value):
         """Проверка существования типа услуги"""
@@ -57,8 +52,7 @@ class ServiceSerializer(serializers.ModelSerializer):
         price_from = data.get('price_from')
         price_to = data.get('price_to')
         
-        # Проверяем цены только если они обе указаны
-        if price_from is not None and price_to is not None and price_from > price_to:
+        if price_from and price_to and price_from > price_to:
             raise serializers.ValidationError("price_from не может быть больше price_to")
         
         return data
@@ -67,10 +61,11 @@ class ServiceSerializer(serializers.ModelSerializer):
 class ServiceListSerializer(serializers.ModelSerializer):
     """Упрощенный сериализатор для списка услуг"""
     service_type_name = serializers.CharField(source='service_type.name', read_only=True)
+    service_type_slug = serializers.CharField(source='service_type.slug', read_only=True)
     
     class Meta:
         model = Service
         fields = [
-            'id', 'name', 'service_type', 'service_type_name', 
+            'id', 'name', 'service_type', 'service_type_name', 'service_type_slug',
             'price_from', 'price_to', 'duration', 'slug'
         ]

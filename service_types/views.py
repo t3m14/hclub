@@ -21,6 +21,10 @@ class ServiceTypeViewSet(viewsets.ModelViewSet):
     ordering_fields = ['name', 'target', 'created_at']
     ordering = ['-created_at']
     
+    # Указываем, что lookup должен происходить по slug
+    lookup_field = 'slug'
+    lookup_url_kwarg = 'slug'
+    
     def get_serializer_class(self):
         if self.action == 'list':
             return ServiceTypeListSerializer

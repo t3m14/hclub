@@ -26,7 +26,7 @@ class ServiceType(models.Model):
         verbose_name='Изображения преимуществ'
     )
     target = models.CharField(
-        max_length=100,
+        max_length=200,
         verbose_name='Цель'
     )
     products = models.JSONField(
