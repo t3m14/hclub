@@ -5,6 +5,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import Master
 from .serializers import MasterSerializer, MasterListSerializer
 from .filters import MasterFilter
+from utils.pagination import CustomPageNumberPagination  # Добавляем пагинацию
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 class MasterViewSet(viewsets.ModelViewSet):
     queryset = Master.objects.prefetch_related('service_types', 'favorite_product').all()
     serializer_class = MasterSerializer
+    pagination_class = CustomPageNumberPagination  # Добавляем пагинацию
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = MasterFilter
     search_fields = ['name', 'job_title']
