@@ -1,55 +1,23 @@
-from rest_framework import serializers
+import django_filters
 from .models import Portfolio
 
 
-class PortfolioSerializer(serializers.ModelSerializer):
-    service_type_name = serializers.CharField(source='service_type.name', read_only=True)
-    service_name = serializers.CharField(source='service.name', read_only=True)
-    service_type_target = serializers.CharField(source='service_type.target', read_only=True)
-    # Добавляем поле с именем мастера как строкой для удобства
-    master_name = serializers.SerializerMethodField()
+class PortfolioFilter(django_filters.FilterSet):
+    master_name = django_filters.CharFilter(method='filter_master_name')
+    service_type_id = django_filters.NumberFilter(field_name='service_type__id')
+    service_id = django_filters.NumberFilter(field_name='service__id')
+    target = django_filters.CharFilter(field_name='service_type__target')
     
     class Meta:
         model = Portfolio
-        fields = [
-            'id', 'image', 'master', 'master_name', 'service_type', 'service_type_name',
-            'service_type_target', 'service', 'service_name',
-            'created_at', 'updated_at'
-        ]
-        read_only_fields = ['created_at', 'updated_at', 'master_name']
+        fields = ['service_type_id', 'service_id', 'target', 'master_name']
     
-    def get_master_name(self, obj):
-        """Получение имени мастера как строки"""
-        if isinstance(obj.master, dict):
-            return obj.master.get('name', 'Неизвестный мастер')
-        return str(obj.master) if obj.master else 'Неизвестный мастер'
-    
-    def validate_master(self, value):
-        """Валидация поля master"""
-        if not isinstance(value, dict):
-            raise serializers.ValidationError("Master должен быть объектом")
+    def filter_master_name(self, queryset, name, value):
+        """Фильтрация по имени мастера (точное и частичное совпадение)"""
+        # Поиск по точному совпадению имени
+        exact_match = queryset.filter(master__name__iexact=value)
+        if exact_match.exists():
+            return exact_match
         
-        required_fields = ['name']
-        for field in required_fields:
-            if field not in value or not value[field]:
-                raise serializers.ValidationError(f"Поле '{field}' обязательно для мастера")
-        
-        return value
-
-
-class PortfolioListSerializer(serializers.ModelSerializer):
-    """Упрощенный сериализатор для списка портфолио"""
-    service_type_name = serializers.CharField(source='service_type.name', read_only=True)
-    service_name = serializers.CharField(source='service.name', read_only=True)
-    master_name = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Portfolio
-        fields = [
-            'id', 'image', 'master_name', 'service_type_name', 'service_name'
-        ]
-    
-    def get_master_name(self, obj):
-        if isinstance(obj.master, dict):
-            return obj.master.get('name', 'Неизвестный мастер')
-        return str(obj.master) if obj.master else 'Неизвестный мастер'
+        # Если точного совпадения нет, ищем по частичному
+        return queryset.filter(master__name__icontains=value)

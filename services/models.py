@@ -55,6 +55,7 @@ class Service(models.Model):
     )
     slug = models.SlugField(
         unique=True,
+        max_length=100,
         verbose_name='URL slug'
     )
     
