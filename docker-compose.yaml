@@ -6,17 +6,19 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=beauty_salon
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     restart: always
-    ports:
-      - "5432:5432"
+
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command: redis-server --requirepass $$REDIS_PASSWORD
+    volumes:
+      - redis_data:/data
 
   celery:
     build: .
@@ -24,11 +26,12 @@ services:
     volumes:
       - .:/app
     environment:
-      - DEBUG=True
-      - DB_HOST=db
-      - DB_NAME=beauty_salon
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
+      - DEBUG=${DEBUG}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
     depends_on:
       - db
       - redis
@@ -39,11 +42,12 @@ services:
     volumes:
       - .:/app
     environment:
-      - DEBUG=True
-      - DB_HOST=db
-      - DB_NAME=beauty_salon
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
+      - DEBUG=${DEBUG}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
     depends_on:
       - db
       - redis
@@ -56,11 +60,13 @@ services:
       - .:/app
       - media_volume:/app/media
     environment:
-      - DEBUG=True
-      - DB_HOST=db
-      - DB_NAME=beauty_salon
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
+      - DEBUG=${DEBUG}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
     restart: on-failure
     depends_on:
       - db
@@ -85,3 +91,4 @@ services:
 volumes:
   postgres_data:
   media_volume:
+  redis_data:
