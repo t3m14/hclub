@@ -4,7 +4,10 @@
     "allow": [
       "Bash(python manage.py:*)",
       "Bash(python:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(ping:*)",
+      "Bash(curl:*)",
+      "Bash(ssh:*)"
     ],
     "deny": []
   }

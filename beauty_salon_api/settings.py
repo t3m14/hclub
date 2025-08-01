@@ -7,10 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='your-secret-key-here')
 
-# Force DEBUG=True when using SQLite (local development)
 DEBUG = config('DEBUG', default=True, cast=bool)
-if config('DB_HOST', default='localhost') == 'db':
-    DEBUG = True
 
 ALLOWED_HOSTS = ["78.24.221.167", "localhost", "127.0.0.1"]
 INSTALLED_APPS = [
@@ -73,27 +70,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'beauty_salon_api.wsgi.application'
 
-# Database
-# Use SQLite for local development when DB_HOST is 'db' (Docker container name)
-if config('DB_HOST', default='localhost') == 'db':
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+# Database - Always use PostgreSQL
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME', default='beauty_salon'),
+        'USER': config('DB_USER', default='postgres'),
+        'PASSWORD': config('DB_PASSWORD', default='postgres'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='5432'),
     }
-else:
-    # Use PostgreSQL for production/local postgres
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': config('DB_NAME', default='beauty_salon'),
-            'USER': config('DB_USER', default='postgres'),
-            'PASSWORD': config('DB_PASSWORD', default='postgres'),
-            'HOST': config('DB_HOST', default='localhost'),
-            'PORT': config('DB_PORT', default='5432'),
-        }
-    }
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
