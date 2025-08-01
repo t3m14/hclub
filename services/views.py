@@ -1,5 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import Service
@@ -14,6 +15,18 @@ logger = logging.getLogger(__name__)
 class ServiceViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.select_related('service_type').all()
     serializer_class = ServiceSerializer
+    
+    def get_permissions(self):
+        """
+        Определение разрешений для разных действий.
+        GET запросы доступны всем, остальные требуют авторизации.
+        """
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        
+        return [permission() for permission in permission_classes]
     pagination_class = ServicePagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ServiceFilter

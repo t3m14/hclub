@@ -6,19 +6,19 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('backend/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('backend/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     
     # API endpoints
-    path('api/auth/', include('authentication.urls')),
-    path('api/service_types/', include('service_types.urls')),  # Изменено для соответствия ТЗ
-    path('api/services/', include('services.urls')),
-    path('api/masters/', include('masters.urls')),
-    path('api/portfolio/', include('portfolio.urls')),
-    path('api/products/', include('products.urls')),
-    path('api/contacts/', include('contacts.urls')),
-    path('api/images/', include('images.urls')),
-    path('api/random-quote/', include('quotes.urls')),
+    path('backend/auth/', include('authentication.urls')),
+    path('backend/service_types/', include('service_types.urls')),  # Изменено для соответствия ТЗ
+    path('backend/services/', include('services.urls')),
+    path('backend/masters/', include('masters.urls')),
+    path('backend/portfolio/', include('portfolio.urls')),
+    path('backend/products/', include('products.urls')),
+    path('backend/contacts/', include('contacts.urls')),
+    path('backend/images/', include('images.urls')),
+    path('backend/random-quote/', include('quotes.urls')),
 ]
 
 if settings.DEBUG:

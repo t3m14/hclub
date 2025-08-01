@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.filters import OrderingFilter
 from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from django.http import Http404
@@ -27,7 +27,18 @@ class ImageUploadViewSet(viewsets.ModelViewSet):
     queryset = ImageUpload.objects.all()
     serializer_class = ImageUploadSerializer
     parser_classes = (MultiPartParser, FormParser)
-    permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        """
+        Определение разрешений для разных действий.
+        GET запросы доступны всем, остальные требуют авторизации.
+        """
+        if self.action in ['list', 'retrieve', 'find_by_slug', 'debug_routes']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        
+        return [permission() for permission in permission_classes]
     filter_backends = [OrderingFilter]
     ordering_fields = ['created_at']
     ordering = ['-created_at']
@@ -39,12 +50,6 @@ class ImageUploadViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return ImageListSerializer
         return ImageUploadSerializer
-    
-    def get_permissions(self):
-        """
-        Возвращает разрешения для действий
-        """
-        return [IsAuthenticated()]
     
     def create(self, request, *args, **kwargs):
         """

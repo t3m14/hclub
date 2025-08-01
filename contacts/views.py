@@ -1,21 +1,27 @@
 # contacts/views.py
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from .models import Contact
 from .serializers import ContactSerializer
 
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH'])
-@permission_classes([IsAuthenticated])
 def contact_view(request):
     """
     Управление контактной информацией
-    GET - получить контакты
-    POST - создать контакты (если не существуют)
-    PUT/PATCH - обновить контакты
+    GET - получить контакты (без авторизации)
+    POST - создать контакты (если не существуют) (с авторизацией)
+    PUT/PATCH - обновить контакты (с авторизацией)
     """
+    
+    # Проверяем авторизацию только для не-GET запросов
+    if request.method != 'GET' and not request.user.is_authenticated:
+        return Response(
+            {'error': 'Требуется авторизация для данного действия'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     
     if request.method == 'GET':
         # Получаем первый (и единственный) объект контактов
