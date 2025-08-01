@@ -62,7 +62,7 @@ class ServiceTypeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceType
         fields = [
-            'id', 'name', 'target', 'main_image', 'slug', 'services_count',
+            'id', 'name', 'client_types', 'target', 'main_image', 'slug', 'services_count',
         ]
     
     def get_services_count(self, obj):
