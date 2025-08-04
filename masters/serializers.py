@@ -69,12 +69,13 @@ class MasterListSerializer(serializers.ModelSerializer):
     """Упрощенный сериализатор для списка мастеров"""
     service_types_names = serializers.SerializerMethodField()
     favorite_product_name = serializers.SerializerMethodField()
+    favorite_product_id = serializers.IntegerField(source='favorite_product.id', read_only=True)
     
     class Meta:
         model = Master
         fields = [
             'id', 'name', 'image', 'job_title', 'experience', 
-            'service_types_names', 'favorite_product_name'
+            'service_types_names', 'favorite_product_name', 'favorite_product_id'
         ]
     
     def get_service_types_names(self, obj):
