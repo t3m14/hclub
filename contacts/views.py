@@ -8,6 +8,7 @@ from .serializers import ContactSerializer
 
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH'])
+@permission_classes([AllowAny])  # Разрешаем всем GET-запросы
 def contact_view(request):
     """
     Управление контактной информацией
