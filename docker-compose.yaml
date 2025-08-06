@@ -72,21 +72,21 @@ services:
       - db
       - redis
 
-  admin_front:  # <-- Новый сервис для админки (Nuxt.js)
-    build:
-      context: ./h-club_admin_front
-      dockerfile: Dockerfile
-    ports:
-      - "3002:3000"  # Порт из ENV в Dockerfile фронтенда
-    volumes:
-      - ./h-club_admin_front:/front
-      - /front/node_modules  # Изолируем node_modules
-    environment:
-      - NUXT_HOST=0.0.0.0
-      - NUXT_PORT=3000
-    depends_on:
-      - web  # Зависит от бэкенда (если API нужно)
-    restart: unless-stopped
+  # admin_front:  # <-- Новый сервис для админки (Nuxt.js)
+  #   build:
+  #     context: ./h-club_admin_front
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3002:3000"  # Порт из ENV в Dockerfile фронтенда
+  #   volumes:
+  #     - ./h-club_admin_front:/front
+  #     - /front/node_modules  # Изолируем node_modules
+  #   environment:
+  #     - NUXT_HOST=0.0.0.0
+  #     - NUXT_PORT=3000
+  #   depends_on:
+  #     - web  # Зависит от бэкенда (если API нужно)
+  #   restart: unless-stopped
 
 volumes:
   postgres_data:
