@@ -48,14 +48,40 @@ class ServiceSerializer(serializers.ModelSerializer):
         
         return value
     
+    def validate_target(self, value):
+        """Ensure target is a valid JSON array of strings"""
+        if not isinstance(value, list):
+            raise serializers.ValidationError("target должен быть массивом")
+        
+        # Convert single string to list if needed
+        if isinstance(value, str):
+            try:
+                value = json.loads(value)
+            except json.JSONDecodeError:
+                value = [value]
+        
+        # Ensure all elements are strings
+        for item in value:
+            if not isinstance(item, str):
+                raise serializers.ValidationError("Все элементы target должны быть строками")
+        
+        return value
+    
     def validate_client_types(self, value):
-        """Валидация типов клиентов - теперь массив строк"""
+        """Ensure client_types is a valid JSON array of strings"""
         if not isinstance(value, list):
             raise serializers.ValidationError("client_types должен быть массивом")
         
-        # Проверяем, что все элементы - строки
-        for client_type in value:
-            if not isinstance(client_type, str):
+        # Convert single string to list if needed
+        if isinstance(value, str):
+            try:
+                value = json.loads(value)
+            except json.JSONDecodeError:
+                value = [value]
+        
+        # Ensure all elements are strings
+        for item in value:
+            if not isinstance(item, str):
                 raise serializers.ValidationError("Все элементы client_types должны быть строками")
         
         return value
