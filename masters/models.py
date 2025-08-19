@@ -17,7 +17,9 @@ class Master(models.Model):
     service_types = models.ManyToManyField(
         'service_types.ServiceType',  # Исправлено: было 'services.ServiceType'
         related_name='masters',
-        verbose_name='Типы услуг'
+        verbose_name='Типы услуг',
+        blank=True,
+        
     )
     experience = models.PositiveIntegerField(
         validators=[MinValueValidator(0)],

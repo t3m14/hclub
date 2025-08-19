@@ -41,11 +41,11 @@ class Service(models.Model):
         blank=True,
         verbose_name='Этапы услуги'
     )
-    target = models.CharField(
-        max_length=100,
+    target = models.JSONField(
+        default=list,
         blank=True,
-        default='',
-        verbose_name='Цель'
+        # verbose_name='Целевая аудитория',
+        # help_text='Например: ["для мужчин", "для женщин", "для детей"]'
     )
     client_types = models.JSONField(
         default=list,
