@@ -44,15 +44,16 @@ class Service(models.Model):
     target = models.JSONField(
         default=list,
         blank=True,
-        # verbose_name='Целевая аудитория',
-        # help_text='Например: ["для мужчин", "для женщин", "для детей"]'
+        verbose_name='Целевая аудитория',
+        help_text='Например: ["мужчины", "женщины"]'  # Четкий пример формата
     )
     client_types = models.JSONField(
         default=list,
         blank=True,
-        verbose_name='Типы клиентов (массив строк)',
-        help_text='Например: ["для мужчин", "для женщин", "для детей"]'
+        verbose_name='Типы клиентов',
+        help_text='Например: ["новые", "постоянные"]'  # Четкий пример формата
     )
+    
     slug = models.SlugField(
         unique=True,
         max_length=100,
