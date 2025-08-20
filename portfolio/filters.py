@@ -4,7 +4,6 @@ from django.db.models import Q
 from .models import Portfolio
 from django.apps import apps
 
-
 class PortfolioFilter(django_filters.FilterSet):
     service_type_id = django_filters.NumberFilter(method='filter_service_type_id')
     service_id = django_filters.NumberFilter(method='filter_service_id')
@@ -18,39 +17,32 @@ class PortfolioFilter(django_filters.FilterSet):
     def filter_service_type_id(self, queryset, name, value):
         try:
             int_value = int(value)
-            # Альтернативный подход для PostgreSQL JSONField
-            return queryset.filter(service_types__has_key=str(int_value))
+            # Ищем вхождения как в списке, так и в словаре
+            list_condition = Q(service_types__contains=[int_value])
+            dict_condition = Q(service_types__has_key=str(int_value))
+            return queryset.filter(list_condition | dict_condition)
         except (ValueError, TypeError):
             return queryset.none()
 
     def filter_service_id(self, queryset, name, value):
-        """
-        Фильтрация по наличию ID услуги в массиве services
-        """
         try:
             int_value = int(value)
-            # Ищем записи, где services содержит указанный ID
-            # Используем __contains для поиска элемента в массиве
-            return queryset.filter(services__contains=int_value)
+            # Ищем вхождения как в списке, так и в словаре
+            list_condition = Q(services__contains=[int_value])
+            dict_condition = Q(services__has_key=str(int_value))
+            return queryset.filter(list_condition | dict_condition)
         except (ValueError, TypeError):
             return queryset.none()
 
     def filter_master_name(self, queryset, name, value):
-        """
-        Фильтрация по имени мастера
-        """
         exact_match = queryset.filter(master__name__iexact=value)
         if exact_match.exists():
             return exact_match
         return queryset.filter(master__name__icontains=value)
 
     def filter_target(self, queryset, name, value):
-        """
-        Фильтрация по target типов услуг
-        """
         ServiceType = apps.get_model('services', 'ServiceType')
         
-        # Получаем все ID типов услуг с указанным target
         service_type_ids = ServiceType.objects.filter(
             target__iexact=value
         ).values_list('id', flat=True)
@@ -58,9 +50,11 @@ class PortfolioFilter(django_filters.FilterSet):
         if not service_type_ids:
             return queryset.none()
         
-        # Создаем условия для фильтрации по каждому ID
         conditions = Q()
         for st_id in service_type_ids:
-            conditions |= Q(service_types__contains=st_id)
+            # Учитываем оба формата данных
+            list_condition = Q(service_types__contains=[st_id])
+            dict_condition = Q(service_types__has_key=str(st_id))
+            conditions |= (list_condition | dict_condition)
         
         return queryset.filter(conditions)
