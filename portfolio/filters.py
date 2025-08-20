@@ -33,7 +33,7 @@ class PortfolioFilter(django_filters.FilterSet):
         Ищем портфолио, у которых хотя бы один service_type имеет указанный target.
         """
         # Получаем модель ServiceType из правильного приложения
-        ServiceType = apps.get_model('services', 'ServiceType')
+        ServiceType = apps.get_model('service_types', 'ServiceType')
         
         # Получаем все ID типов услуг с указанным target
         service_type_ids = ServiceType.objects.filter(
