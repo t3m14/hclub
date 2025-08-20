@@ -16,14 +16,10 @@ class PortfolioFilter(django_filters.FilterSet):
         fields = ['service_type_id', 'service_id', 'master_name', 'target']
 
     def filter_service_type_id(self, queryset, name, value):
-        """
-        Фильтрация по наличию ID типа услуги в массиве service_types
-        """
         try:
             int_value = int(value)
-            # Ищем записи, где service_types содержит указанный ID
-            # Используем __contains для поиска элемента в массиве
-            return queryset.filter(service_types__contains=int_value)
+            # Альтернативный подход для PostgreSQL JSONField
+            return queryset.filter(service_types__has_key=str(int_value))
         except (ValueError, TypeError):
             return queryset.none()
 
