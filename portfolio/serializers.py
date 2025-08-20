@@ -1,54 +1,108 @@
+# serializers.py
 from rest_framework import serializers
 from .models import Portfolio
+from services.models import ServiceType, Service
+
+
+class ServiceTypesField(serializers.Field):
+    def to_representation(self, value):
+        if not value:
+            return []
+        try:
+            service_types = ServiceType.objects.filter(id__in=value)
+            return [{'id': st.id, 'name': st.name, 'target': st.target} for st in service_types]
+        except (ValueError, TypeError):
+            return []
+
+    def to_internal_value(self, data):
+        if data is None:
+            return []
+        if not isinstance(data, list):
+            raise serializers.ValidationError("Ожидается список ID для типов услуг")
+        
+        # Фильтруем только валидные ID (целые числа)
+        valid_ids = []
+        for item in data:
+            try:
+                valid_ids.append(int(item))
+            except (ValueError, TypeError):
+                continue
+        
+        return valid_ids
+
+
+class ServicesField(serializers.Field):
+    def to_representation(self, value):
+        if not value:
+            return []
+        try:
+            services = Service.objects.filter(id__in=value)
+            return [{'id': s.id, 'name': s.name} for s in services]
+        except (ValueError, TypeError):
+            return []
+
+    def to_internal_value(self, data):
+        if data is None:
+            return []
+        if not isinstance(data, list):
+            raise serializers.ValidationError("Ожидается список ID для услуг")
+        
+        # Фильтруем только валидные ID (целые числа)
+        valid_ids = []
+        for item in data:
+            try:
+                valid_ids.append(int(item))
+            except (ValueError, TypeError):
+                continue
+        
+        return valid_ids
 
 
 class PortfolioSerializer(serializers.ModelSerializer):
-    service_type_name = serializers.CharField(source='service_type.name', read_only=True)
-    service_name = serializers.CharField(source='service.name', read_only=True)
-    service_type_target = serializers.CharField(source='service_type.target', read_only=True)
-    # Добавляем поле с именем мастера как строкой для удобства
+    service_types = ServiceTypesField(required=False, allow_null=True)
+    services = ServicesField(required=False, allow_null=True)
     master_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Portfolio
         fields = [
-            'id', 'image', 'master', 'master_name', 'service_type', 'service_type_name',
-            'service_type_target', 'service', 'service_name',
-            'created_at', 'updated_at'
+            'id', 'image', 'master', 'master_name', 
+            'service_types', 'services', 'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at', 'master_name']
-    
+
     def get_master_name(self, obj):
-        """Получение имени мастера как строки"""
         if isinstance(obj.master, dict):
             return obj.master.get('name', 'Неизвестный мастер')
         return str(obj.master) if obj.master else 'Неизвестный мастер'
-    
+
     def validate_master(self, value):
-        """Валидация поля master"""
         if not isinstance(value, dict):
             raise serializers.ValidationError("Master должен быть объектом")
-        
         required_fields = ['name']
         for field in required_fields:
             if field not in value or not value[field]:
                 raise serializers.ValidationError(f"Поле '{field}' обязательно для мастера")
-        
         return value
+
+    def validate(self, data):
+        # Убедимся, что если поля переданы, они проходят валидацию
+        if 'service_types' in data and data['service_types'] is None:
+            data['service_types'] = []
+        if 'services' in data and data['services'] is None:
+            data['services'] = []
+        return data
 
 
 class PortfolioListSerializer(serializers.ModelSerializer):
-    """Упрощенный сериализатор для списка портфолио"""
-    service_type_name = serializers.CharField(source='service_type.name', read_only=True)
-    service_name = serializers.CharField(source='service.name', read_only=True)
+    service_types = ServiceTypesField(read_only=True)
+    services = ServicesField(read_only=True)
     master_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Portfolio
-        fields = [
-            'id', 'image', 'master_name', 'service_type_name', 'service_name'
-        ]
-    
+        fields = ['id', 'image', 'master_name', 'service_types', 'services']
+
     def get_master_name(self, obj):
         if isinstance(obj.master, dict):
             return obj.master.get('name', 'Неизвестный мастер')

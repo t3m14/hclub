@@ -4,17 +4,17 @@ from django.db import models
 class Portfolio(models.Model):
     image = models.URLField(verbose_name='Изображение')
     master = models.JSONField(verbose_name='Мастер')  # Хранится как объект, не привязан к ID
-    service_type = models.ForeignKey(
-        'service_types.ServiceType',  # Исправлено: полный путь к модели
-        on_delete=models.CASCADE,
-        related_name='portfolio_items',
-        verbose_name='Тип услуги'
+    service_types = models.JSONField(
+        verbose_name='Тип услуги',
+        default=dict,
+        null=True,
+        blank=True
     )
-    service = models.ForeignKey(
-        'services.Service',
-        on_delete=models.CASCADE,
-        related_name='portfolio_items',
-        verbose_name='Услуга'
+    services = models.JSONField(
+        verbose_name='Услуга',
+        default=dict,
+        null=True,
+        blank=True
     )
     
     created_at = models.DateTimeField(auto_now_add=True)

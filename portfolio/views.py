@@ -8,8 +8,7 @@ from .filters import PortfolioFilter
 
 
 class PortfolioViewSet(viewsets.ModelViewSet):
-    queryset = Portfolio.objects.select_related('service_type', 'service').all()
-    
+    queryset = Portfolio.objects.all()    
     def get_permissions(self):
         """
         Определение разрешений для разных действий.
@@ -23,10 +22,10 @@ class PortfolioViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = PortfolioFilter
-    search_fields = ['master__name', 'service_type__name', 'service__name']
+    search_fields = ['master__name']  # Убрали поиск по связанным полям
     ordering_fields = ['created_at']
     ordering = ['-created_at']
-    
+
     def get_serializer_class(self):
         if self.action == 'list':
             return PortfolioListSerializer
