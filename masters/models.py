@@ -23,7 +23,10 @@ class Master(models.Model):
     )
     experience = models.PositiveIntegerField(
         validators=[MinValueValidator(0)],
-        verbose_name='Опыт работы (лет)'
+        verbose_name='Опыт работы (лет)',
+        null=True,
+        blank=True,
+        default=0
     )
     
     created_at = models.DateTimeField(auto_now_add=True)

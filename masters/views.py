@@ -42,7 +42,8 @@ class MasterViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         """Создание мастера"""
         logger.info(f"Creating master with data: {request.data}")
-        
+        if 'experience' in request.data and request.data['experience'] is None:
+            request.data['experience'] = None  # Явно устанавливаем None
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             master = serializer.save()

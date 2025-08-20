@@ -8,28 +8,17 @@ class MasterSerializer(serializers.ModelSerializer):
     favorite_product_detail = ProductSerializer(source='favorite_product', read_only=True)
     service_types_detail = ServiceTypeSerializer(source='service_types', many=True, read_only=True)
     service_types_ids = serializers.ListField(
-        child=serializers.IntegerField(),
-        write_only=True,
-        required=True,  # Делаем обязательным
-        help_text="Список ID типов услуг"
-    )
-    
-    class Meta:
-        model = Master
-        fields = [
-            'id', 'name', 'image', 'job_title', 'favorite_product',
-            'favorite_product_detail', 'service_types', 'service_types_detail',
-            'service_types_ids', 'experience', 'created_at', 'updated_at'
-        ]
-        read_only_fields = ['created_at', 'updated_at', 'service_types']
-        extra_kwargs = {
-            'service_types': {'required': False}  # Делаем service_types не обязательным
-        }
-    
+    child=serializers.IntegerField(),
+    write_only=True,
+    required=False,  # Делаем необязательным
+    help_text="Список ID типов услуг"
+)
+
     def validate_service_types_ids(self, value):
-        """Валидация типов услуг"""
+        """Валидация типов услуг (теперь необязательная)"""
         if not value:
-            raise serializers.ValidationError("Необходимо указать хотя бы один тип услуги")
+            # Если список пустой, просто возвращаем его
+            return value
         
         # Проверяем, что все ID существуют
         from service_types.models import ServiceType
@@ -47,10 +36,23 @@ class MasterSerializer(serializers.ModelSerializer):
         service_types_ids = validated_data.pop('service_types_ids', [])
         master = Master.objects.create(**validated_data)
         
+        # Устанавливаем связи только если переданы IDs
         if service_types_ids:
             master.service_types.set(service_types_ids)
         
         return master
+    
+    class Meta:
+        model = Master
+        fields = [
+            'id', 'name', 'image', 'job_title', 'favorite_product',
+            'favorite_product_detail', 'service_types', 'service_types_detail',
+            'service_types_ids', 'experience', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'service_types']
+        extra_kwargs = {
+            'service_types': {'required': False}  # Делаем service_types не обязательным
+        }
     
     def update(self, instance, validated_data):
         service_types_ids = validated_data.pop('service_types_ids', None)
