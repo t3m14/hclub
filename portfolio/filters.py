@@ -4,6 +4,7 @@ from django.db.models import Q
 from .models import Portfolio
 from django.apps import apps
 
+
 class PortfolioFilter(django_filters.FilterSet):
     service_type_id = django_filters.NumberFilter(method='filter_service_type_id')
     service_id = django_filters.NumberFilter(method='filter_service_id')
@@ -42,19 +43,19 @@ class PortfolioFilter(django_filters.FilterSet):
 
     def filter_target(self, queryset, name, value):
         """
-        Фильтрация по target типов услуг или услуг
+        Фильтрация по target типов услуг
         """
         ServiceType = apps.get_model('service_types', 'ServiceType')
-        Service = apps.get_model('services', 'Service')
+        Service = apps.get_model('service_types', 'Service')  # Исправлено на правильное приложение
         
         # Получаем все ID типов услуг с указанным target
         service_type_ids = ServiceType.objects.filter(
-            target__iexact=value
+            target__contains=value  # Используем contains вместо iexact
         ).values_list('id', flat=True)
         
         # Получаем все ID услуг с указанным target
         service_ids = Service.objects.filter(
-            target__iexact=value
+            target__contains=value  # Используем contains вместо iexact
         ).values_list('id', flat=True)
         
         # Создаем условия для фильтрации
@@ -62,10 +63,20 @@ class PortfolioFilter(django_filters.FilterSet):
         
         # Для типов услуг
         for st_id in service_type_ids:
-            conditions |= Q(service_types__contains=st_id)
+            # Ищем в обоих форматах (список и словарь)
+            list_condition = Q(service_types__contains=[st_id])
+            dict_condition = Q(service_types__has_key=str(st_id))
+            conditions |= (list_condition | dict_condition)
         
         # Для услуг
         for s_id in service_ids:
-            conditions |= Q(services__contains=s_id)
+            # Ищем в обоих форматах (список и словарь)
+            list_condition = Q(services__contains=[s_id])
+            dict_condition = Q(services__has_key=str(s_id))
+            conditions |= (list_condition | dict_condition)
+        
+        # Если нет подходящих ID, возвращаем пустой queryset
+        if not service_type_ids and not service_ids:
+            return queryset.none()
         
         return queryset.filter(conditions)
