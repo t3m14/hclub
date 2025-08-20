@@ -17,23 +17,25 @@ class PortfolioFilter(django_filters.FilterSet):
 
     def filter_service_type_id(self, queryset, name, value):
         """
-        Фильтрация по ID типа услуги в массиве service_types
+        Фильтрация по наличию ID типа услуги в массиве service_types
         """
         try:
             int_value = int(value)
             # Ищем записи, где service_types содержит указанный ID
-            return queryset.filter(service_types__contains=[int_value])
+            # Используем __contains для поиска элемента в массиве
+            return queryset.filter(service_types__contains=int_value)
         except (ValueError, TypeError):
             return queryset.none()
 
     def filter_service_id(self, queryset, name, value):
         """
-        Фильтрация по ID услуги в массиве services
+        Фильтрация по наличию ID услуги в массиве services
         """
         try:
             int_value = int(value)
             # Ищем записи, где services содержит указанный ID
-            return queryset.filter(services__contains=[int_value])
+            # Используем __contains для поиска элемента в массиве
+            return queryset.filter(services__contains=int_value)
         except (ValueError, TypeError):
             return queryset.none()
 
@@ -63,6 +65,6 @@ class PortfolioFilter(django_filters.FilterSet):
         # Создаем условия для фильтрации по каждому ID
         conditions = Q()
         for st_id in service_type_ids:
-            conditions |= Q(service_types__contains=[st_id])
+            conditions |= Q(service_types__contains=st_id)
         
         return queryset.filter(conditions)
