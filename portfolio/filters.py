@@ -31,21 +31,20 @@ class PortfolioFilter(django_filters.FilterSet):
 
     def filter_target(self, queryset, name, value):
         """
-        Фильтрация по target для PostgreSQL с использованием встроенных функций.
+        Фильтрация по target, который находится внутри service_types.
+        Используем префиetch для эффективной загрузки связанных данных.
         """
-        ServiceType = apps.get_model('service_types', 'ServiceType')
+        # Аннотируем queryset флагом, указывающим на наличие service_type с нужным target
+        ServiceType = apps.get_model('services', 'ServiceType')
         
-        # Создаем подзапрос для получения ID service_types с нужным target
-        service_type_ids = ServiceType.objects.filter(
+        # Создаем подзапрос для определения наличия service_type с нужным target
+        service_types_with_target = ServiceType.objects.filter(
             target__iexact=value
-        ).values('id')
+        ).values_list('id', flat=True)
         
-        # Используем PostgreSQL функцию для поиска пересечения массивов
+        # Используем аннотацию для фильтрации
         return queryset.annotate(
-            has_intersection=Func(
-                'service_types',
-                ArraySubquery(service_type_ids),
-                function='array_overlap',
-                output_field=BooleanField()
+            has_target=Exists(
+                Portfolio.service_types.intersection(service_types_with_target)
             )
-        ).filter(has_intersection=True)
+        ).filter(has_target=True)
