@@ -49,7 +49,7 @@ class ServicesField(serializers.Field):
             # Преобразуем Decimal в int для поиска
             int_ids = [int(id) for id in value]
             
-            Service = apps.get_model('service_types', 'Service')
+            Service = apps.get_model('service', 'Service')
             services = Service.objects.filter(id__in=int_ids)
             return [{'id': s.id, 'name': s.name} for s in services]
         except (LookupError, ImportError):
