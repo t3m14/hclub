@@ -1,16 +1,25 @@
 # serializers.py
 from rest_framework import serializers
+from django.apps import apps
 from .models import Portfolio
-from services.models import Service
-from service_types.models import ServiceType
+import json
+
 
 class ServiceTypesField(serializers.Field):
     def to_representation(self, value):
         if not value:
             return []
+        
         try:
-            service_types = ServiceType.objects.filter(id__in=value)
+            # Преобразуем Decimal в int для поиска
+            int_ids = [int(id) for id in value]
+            
+            ServiceType = apps.get_model('services', 'ServiceType')
+            service_types = ServiceType.objects.filter(id__in=int_ids)
             return [{'id': st.id, 'name': st.name, 'target': st.target} for st in service_types]
+        except (LookupError, ImportError):
+            # Если модель не найдена, возвращаем только ID (преобразованные в int)
+            return [{'id': int(id)} for id in value]
         except (ValueError, TypeError):
             return []
 
@@ -20,7 +29,7 @@ class ServiceTypesField(serializers.Field):
         if not isinstance(data, list):
             raise serializers.ValidationError("Ожидается список ID для типов услуг")
         
-        # Фильтруем только валидные ID (целые числа)
+        # Фильтруем только валидные ID и преобразуем в int
         valid_ids = []
         for item in data:
             try:
@@ -35,9 +44,17 @@ class ServicesField(serializers.Field):
     def to_representation(self, value):
         if not value:
             return []
+        
         try:
-            services = Service.objects.filter(id__in=value)
+            # Преобразуем Decimal в int для поиска
+            int_ids = [int(id) for id in value]
+            
+            Service = apps.get_model('services', 'Service')
+            services = Service.objects.filter(id__in=int_ids)
             return [{'id': s.id, 'name': s.name} for s in services]
+        except (LookupError, ImportError):
+            # Если модель не найдена, возвращаем только ID (преобразованные в int)
+            return [{'id': int(id)} for id in value]
         except (ValueError, TypeError):
             return []
 
@@ -47,7 +64,7 @@ class ServicesField(serializers.Field):
         if not isinstance(data, list):
             raise serializers.ValidationError("Ожидается список ID для услуг")
         
-        # Фильтруем только валидные ID (целые числа)
+        # Фильтруем только валидные ID и преобразуем в int
         valid_ids = []
         for item in data:
             try:
@@ -86,7 +103,6 @@ class PortfolioSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
-        # Убедимся, что если поля переданы, они проходят валидацию
         if 'service_types' in data and data['service_types'] is None:
             data['service_types'] = []
         if 'services' in data and data['services'] is None:

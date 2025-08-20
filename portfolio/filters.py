@@ -16,10 +16,12 @@ class PortfolioFilter(django_filters.FilterSet):
         fields = ['service_type_id', 'service_id', 'master_name', 'target']
 
     def filter_service_type_id(self, queryset, name, value):
-        return queryset.filter(service_types__contains=[value])
+        # Преобразуем значение в int для корректного сравнения
+        return queryset.filter(service_types__contains=[int(value)])
 
     def filter_service_id(self, queryset, name, value):
-        return queryset.filter(services__contains=[value])
+        # Преобразуем значение в int для корректного сравнения
+        return queryset.filter(services__contains=[int(value)])
 
     def filter_master_name(self, queryset, name, value):
         exact_match = queryset.filter(master__name__iexact=value)
@@ -30,10 +32,8 @@ class PortfolioFilter(django_filters.FilterSet):
     def filter_target(self, queryset, name, value):
         """
         Фильтрация по target, который находится внутри service_types.
-        Ищем портфолио, у которых хотя бы один service_type имеет указанный target.
         """
-        # Получаем модель ServiceType из правильного приложения
-        ServiceType = apps.get_model('service_types', 'ServiceType')
+        ServiceType = apps.get_model('services', 'ServiceType')
         
         # Получаем все ID типов услуг с указанным target
         service_type_ids = ServiceType.objects.filter(
@@ -43,6 +43,6 @@ class PortfolioFilter(django_filters.FilterSet):
         # Создаем условия для фильтрации по каждому ID
         conditions = Q()
         for st_id in service_type_ids:
-            conditions |= Q(service_types__contains=[st_id])
+            conditions |= Q(service_types__contains=[int(st_id)])
         
         return queryset.filter(conditions)
