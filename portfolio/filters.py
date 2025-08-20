@@ -33,7 +33,7 @@ class PortfolioFilter(django_filters.FilterSet):
         """
         Фильтрация по target для PostgreSQL с использованием встроенных функций.
         """
-        ServiceType = apps.get_model('services', 'ServiceType')
+        ServiceType = apps.get_model('service_types', 'ServiceType')
         
         # Создаем подзапрос для получения ID service_types с нужным target
         service_type_ids = ServiceType.objects.filter(
