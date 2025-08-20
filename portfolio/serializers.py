@@ -1,8 +1,8 @@
 # serializers.py
 from rest_framework import serializers
 from .models import Portfolio
-from services.models import ServiceType, Service
-
+from services.models import Service
+from service_types.models import ServiceType
 
 class ServiceTypesField(serializers.Field):
     def to_representation(self, value):
