@@ -45,7 +45,7 @@ class PortfolioFilter(django_filters.FilterSet):
         Фильтрация по target типов услуг или услуг
         """
         ServiceType = apps.get_model('service_types', 'ServiceType')
-        Service = apps.get_model('service_types', 'Service')
+        Service = apps.get_model('service', 'Service')
         
         # Получаем все ID типов услуг с указанным target
         service_type_ids = ServiceType.objects.filter(
