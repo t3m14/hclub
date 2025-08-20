@@ -16,14 +16,31 @@ class PortfolioFilter(django_filters.FilterSet):
         fields = ['service_type_id', 'service_id', 'master_name', 'target']
 
     def filter_service_type_id(self, queryset, name, value):
-        # Преобразуем значение в int для корректного сравнения
-        return queryset.filter(service_types__contains=[int(value)])
+        """
+        Фильтрация по ID типа услуги в массиве service_types
+        """
+        try:
+            int_value = int(value)
+            # Ищем записи, где service_types содержит указанный ID
+            return queryset.filter(service_types__contains=[int_value])
+        except (ValueError, TypeError):
+            return queryset.none()
 
     def filter_service_id(self, queryset, name, value):
-        # Преобразуем значение в int для корректного сравнения
-        return queryset.filter(services__contains=[int(value)])
+        """
+        Фильтрация по ID услуги в массиве services
+        """
+        try:
+            int_value = int(value)
+            # Ищем записи, где services содержит указанный ID
+            return queryset.filter(services__contains=[int_value])
+        except (ValueError, TypeError):
+            return queryset.none()
 
     def filter_master_name(self, queryset, name, value):
+        """
+        Фильтрация по имени мастера
+        """
         exact_match = queryset.filter(master__name__iexact=value)
         if exact_match.exists():
             return exact_match
@@ -31,7 +48,7 @@ class PortfolioFilter(django_filters.FilterSet):
 
     def filter_target(self, queryset, name, value):
         """
-        Фильтрация по target, который находится внутри service_types.
+        Фильтрация по target типов услуг
         """
         ServiceType = apps.get_model('services', 'ServiceType')
         
@@ -40,9 +57,12 @@ class PortfolioFilter(django_filters.FilterSet):
             target__iexact=value
         ).values_list('id', flat=True)
         
+        if not service_type_ids:
+            return queryset.none()
+        
         # Создаем условия для фильтрации по каждому ID
         conditions = Q()
         for st_id in service_type_ids:
-            conditions |= Q(service_types__contains=[int(st_id)])
+            conditions |= Q(service_types__contains=[st_id])
         
         return queryset.filter(conditions)
