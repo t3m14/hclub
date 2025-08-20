@@ -2,10 +2,8 @@
 import django_filters
 from django.db.models import Q
 from .models import Portfolio
-from django.db.models import Func, Value, BooleanField
-from django.contrib.postgres.fields import ArrayField
-from django.contrib.postgres.expressions import ArraySubquery
 from django.apps import apps
+from django.db.models import Exists
 
 class PortfolioFilter(django_filters.FilterSet):
     service_type_id = django_filters.NumberFilter(method='filter_service_type_id')
@@ -35,7 +33,7 @@ class PortfolioFilter(django_filters.FilterSet):
         Используем префиetch для эффективной загрузки связанных данных.
         """
         # Аннотируем queryset флагом, указывающим на наличие service_type с нужным target
-        ServiceType = apps.get_model('services', 'ServiceType')
+        ServiceType = apps.get_model('service_types', 'ServiceType')
         
         # Создаем подзапрос для определения наличия service_type с нужным target
         service_types_with_target = ServiceType.objects.filter(
