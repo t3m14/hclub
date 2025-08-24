@@ -29,8 +29,8 @@ class ServiceSerializer(serializers.ModelSerializer):
         if not isinstance(value, list):
             raise serializers.ValidationError("main_images должен быть массивом")
         
-        if len(value) > 2:
-            raise serializers.ValidationError("Максимум 2 изображения")
+        if len(value) > 6:
+            raise serializers.ValidationError("Максимум 6ы изображения")
         
         return value
     

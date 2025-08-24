@@ -89,13 +89,18 @@ class PortfolioSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at', 'master_name']
 
     def get_master_name(self, obj):
+        if obj.master is None:
+            return 'Мастер не указан'
         if isinstance(obj.master, dict):
             return obj.master.get('name', 'Неизвестный мастер')
         return str(obj.master) if obj.master else 'Неизвестный мастер'
 
     def validate_master(self, value):
+        # Разрешаем None значение
+        if value is None:
+            return None
         if not isinstance(value, dict):
-            raise serializers.ValidationError("Master должен быть объектом")
+            raise serializers.ValidationError("Master должен быть объектом или null")
         required_fields = ['name']
         for field in required_fields:
             if field not in value or not value[field]:
@@ -107,9 +112,10 @@ class PortfolioSerializer(serializers.ModelSerializer):
             data['service_types'] = []
         if 'services' in data and data['services'] is None:
             data['services'] = []
+        # Разрешаем master быть None
+        if 'master' in data and data['master'] is None:
+            data['master'] = None
         return data
-
-
 class PortfolioListSerializer(serializers.ModelSerializer):
     service_types = ServiceTypesField(read_only=True)
     services = ServicesField(read_only=True)
@@ -120,6 +126,8 @@ class PortfolioListSerializer(serializers.ModelSerializer):
         fields = ['id', 'image', 'master_name', 'service_types', 'services']
 
     def get_master_name(self, obj):
+        if obj.master is None:
+            return 'Мастер не указан'
         if isinstance(obj.master, dict):
             return obj.master.get('name', 'Неизвестный мастер')
         return str(obj.master) if obj.master else 'Неизвестный мастер'

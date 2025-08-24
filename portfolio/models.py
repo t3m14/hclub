@@ -3,7 +3,7 @@ from django.db import models
 
 class Portfolio(models.Model):
     image = models.URLField(verbose_name='Изображение')
-    master = models.JSONField(verbose_name='Мастер')  # Хранится как объект, не привязан к ID
+    master = models.JSONField(verbose_name='Мастер', null=True, blank=True)  # Хранится как объект, не привязан к ID
     service_types = models.JSONField(
         verbose_name='Тип услуги',
         default=dict,
