@@ -30,11 +30,14 @@ services:
       - .:/app
     environment:
       - DEBUG=${DEBUG}
-      - DB_HOST=${DB_HOST}
+      - DB_HOST=db  # Используйте имя сервиса вместо переменной
       - DB_NAME=${POSTGRES_DB}
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0  # Добавьте эту строку
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0  # И эту
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0  # И эту
     depends_on:
       - db
       - redis
@@ -48,11 +51,14 @@ services:
       - .:/app
     environment:
       - DEBUG=${DEBUG}
-      - DB_HOST=${DB_HOST}
+      - DB_HOST=db  # Используйте имя сервиса вместо переменной
       - DB_NAME=${POSTGRES_DB}
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0  # Добавьте эту строку
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0  # И эту
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0  # И эту
     depends_on:
       - db
       - redis
