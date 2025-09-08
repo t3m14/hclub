@@ -108,6 +108,7 @@ services:
       volumes:
         - ./nginx.conf:/etc/nginx/nginx.conf
         - ./ssl:/etc/ssl/certs
+        - media_volume:/app/media
       depends_on:
         - web
         - front
@@ -124,7 +125,3 @@ services:
   networks:
     app-network:
       driver: bridge
-volumes:
-  postgres_data:
-  media_volume:
-  redis_data:
