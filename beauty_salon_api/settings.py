@@ -9,7 +9,20 @@ SECRET_KEY = config('SECRET_KEY', default='your-secret-key-here')
 
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ["78.24.221.167", "localhost", "127.0.0.1"]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://te5td0main.ru',
+    'https://www.te5td0main.ru'
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'https://te5td0main.ru',
+    'https://www.te5td0main.ru'
+]
+
+
+ALLOWED_HOSTS = ["78.24.221.167", "localhost", "127.0.0.1", 'https://te5td0main.ru', 'https://www.te5td0main.ru']
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
