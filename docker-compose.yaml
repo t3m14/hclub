@@ -91,10 +91,13 @@ services:
     build:
       context: ./h-club_front
       dockerfile: Dockerfile
-    # command: node --max-old-space-size=4096 .output/server/index.mjs
+    mem_limit: 4g
+    mem_reservation: 2g
+    command: node --max-old-space-size=4096 .output/server/index.mjs
     ports:
       - "3000:3000"
     environment:
+      - NODE_OPTIONS=--max-old-space-size=4096
       - NUXT_HOST=0.0.0.0
       - NUXT_PORT=3000
       - BACKEND_URL=https://te5td0main.ru/api
