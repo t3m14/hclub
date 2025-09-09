@@ -128,12 +128,12 @@ services:
       # - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./ssl:/etc/ssl/certs
+      # - ./ssl:/etc/ssl/certss
       - media_volume:/app/media
     depends_on:
       - web
       - front
-      - admin_front
+      # - admin_front
     networks:
       - app-network
     restart: unless-stopped
