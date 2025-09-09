@@ -91,8 +91,6 @@ services:
     build:
       context: ./h-club_front
       dockerfile: Dockerfile
-    mem_limit: 4g
-    mem_reservation: 2g
     command: node --max-old-space-size=4096 .output/server/index.mjs
     ports:
       - "3000:3000"
