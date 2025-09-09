@@ -93,7 +93,7 @@ services:
       dockerfile: Dockerfile
     command: node --max-old-space-size=4096 .output/server/index.mjs
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - NODE_OPTIONS=--max-old-space-size=4096
       - NUXT_HOST=0.0.0.0
