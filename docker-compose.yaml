@@ -92,6 +92,8 @@ services:
       context: ./h-club_front
       dockerfile: Dockerfile
     command: node --max-old-space-size=4096 .output/server/index.mjs
+    ports:
+      - "3000:3000"
     environment:
       - NUXT_HOST=0.0.0.0
       - NUXT_PORT=3000
