@@ -91,7 +91,7 @@ services:
     build:
       context: ./h-club_front
       dockerfile: Dockerfile
-    command: node --max-old-space-size=4096 .output/server/index.mjs
+    # command: node --max-old-space-size=4096 .output/server/index.mjs
     ports:
       - "3000:3000"
     environment:
