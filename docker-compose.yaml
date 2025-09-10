@@ -106,7 +106,7 @@ services:
       context: ./h-club_admin_front
       dockerfile: Dockerfile
     ports:
-      "3002:3002"
+      - "3002:3002"
     environment:
       - NUXT_HOST=0.0.0.0
       - NUXT_PORT=3002
