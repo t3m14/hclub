@@ -91,38 +91,29 @@ services:
     build:
       context: ./h-club_front
       dockerfile: Dockerfile
-    command: node --max-old-space-size=4096 .output/server/index.mjs
     ports:
-      - "3001:3000"
+      - "3000:3000"
     environment:
-      - NODE_OPTIONS=--max-old-space-size=4096
       - NUXT_HOST=0.0.0.0
       - NUXT_PORT=3000
-      - BACKEND_URL=https://te5td0main.ru/api
     networks:
       - app-network
     depends_on:
       - web
-    deploy:
-      resources:
-        limits:
-          memory: 512M  # ⬅️ Установите лимит памяти (пример)
-        reservations:
-          memory: 256M   # ⬅️ Резервирование памяти (пример)
 
-
-  # admin_front:
-  #   build:
-  #     context: ./h-club_admin_front
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     - NUXT_HOST=0.0.0.0
-  #     - NUXT_PORT=3000
-  #     - BACKEND_URL=https://te5td0main.ru/api
-  #   networks:
-  #     - app-network
-  #   depends_on:
-  #     - web
+  admin_front:
+    build:
+      context: ./h-club_admin_front
+      dockerfile: Dockerfile
+    ports:
+      "3002:3002"
+    environment:
+      - NUXT_HOST=0.0.0.0
+      - NUXT_PORT=3002
+    networks:
+      - app-network
+    depends_on:
+      - web
 
   # nginx:
   #   image: nginx:alpine
