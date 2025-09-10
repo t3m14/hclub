@@ -21,7 +21,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 
-ALLOWED_HOSTS = ["78.24.221.167", "localhost", "127.0.0.1", 'https://te5td0main.ru', 'https://www.te5td0main.ru']
+ALLOWED_HOSTS = ["78.24.221.167", "localhost", "127.0.0.1", 'te5td0main.ru', 'www.te5td0main.ru']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
