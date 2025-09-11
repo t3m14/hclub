@@ -119,15 +119,15 @@ services:
     image: nginx:alpine
     ports:
       - "80:80"
-      # - "443:443"
+      - "443:443"  # Раскомментируйте эту строку
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      # - ./ssl:/etc/ssl/certss
+      - ./ssl:/etc/ssl/certs  # Создайте эту директорию
+      - /etc/letsencrypt:/etc/letsencrypt  # Добавьте этот volume
       - media_volume:/app/media
     depends_on:
       - web
       - front
-      # - admin_front
     networks:
       - app-network
     restart: unless-stopped
